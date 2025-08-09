@@ -1,0 +1,156 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+body {
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  font-family: "Noto Sans", sans-serif;
+}
+.container {
+  margin-top: 100px;
+  background-color: #f6f8faa0;
+  border-radius: 20px;
+  height: 400px;
+  box-shadow: 5px 5px 20px 5px #c5e6b174;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 20 px;
+}
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  margin-top: 10px;
+}
+.uploadlist {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.box {
+  width: 150px;
+  height: 100px;
+  border: 1px solid rgb(88, 158, 14);
+  border-radius: 10%;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5px;
+  box-sizing: border-box;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.box.dragover {
+  border-color: #007bff;
+  background-color: #e6f0ff;
+}
+
+.filename {
+  font-size: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.upload-btn {
+  margin-top: 5px;
+  font-size: 12px;
+  padding: 2px 6px;
+  cursor: pointer;
+  border: 0.5px solid rgb(4, 83, 6);
+  border-radius: 10%;
+}
+
+.joinfile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+.joinfile-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #36a638;
+  color: white;
+  font-weight: 600;
+  border: none;
+}
+.joinfile-btn:hover {
+  opacity: 0.8;
+}
+
+.joinfile-progress {
+  border-radius: 7px;
+  width: 80%;
+  height: 22px;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+}
+.joinfile-progress::-webkit-progress-bar {
+  background-color: rgb(26, 255, 0);
+  border-radius: 7px;
+}
+.joinfile-progress::-webkit-progress-value {
+  background-color: rgb(255, 234, 0);
+  border-radius: 7px;
+}
+
+.result {
+  width: 55%;
+  height: 30px;
+  margin-top: 20px;
+  border-left: 5px solid greenyellow;
+  border-radius: 10px;
+  background-color: rgba(172, 255, 47, 0.2);
+  align-self: flex-start;
+}
+.result {
+  display: flex;
+  align-items: center;
+}
+.result-text {
+  margin-left: 10px;
+  margin-right: 10px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: red;
+}
+.downloadresultbtn {
+  margin-left: 20px;
+  border: none;
+  padding: 5px;
+  background-color: rgba(203, 255, 47, 0.679);
+  color: rgb(0, 128, 126);
+  font-weight: 600;
+  cursor: pointer;
+  display: none;
+}
+
+.progressBar {
+  width: 80%;
+  visibility: hidden;
+  margin-top: 20px;
+}

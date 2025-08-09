@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Ghép nối file</h2>
+      <div class="uploadlist">
+        <div class="upload-item upload-item1">
+          <label>
+            1. Nạp đầu
+            <input type="file" id="fileND" class="file-input" />
+            <div class="box">
+              <div class="filename">Chưa có tệp</div>
+              <button type="button" class="upload-btn">Tải file</button>
+            </div>
+          </label>
+        </div>
+
+        <div class="upload-item upload-item2">
+          <label>
+            2. BCTT
+            <input type="file" id="fileBCTT" class="file-input" />
+            <div class="box">
+              <div class="filename">Chưa có tệp</div>
+              <button type="button" class="upload-btn">Tải file</button>
+            </div>
+          </label>
+        </div>
+
+        <div class="upload-item upload-item3">
+          <label>
+            3. Khuyến mãi
+            <input type="file" id="fileKM" class="file-input" />
+            <div class="box">
+              <div class="filename">Chưa có tệp</div>
+              <button type="button" class="upload-btn">Tải file</button>
+            </div>
+          </label>
+        </div>
+
+        <div class="upload-item upload-item4">
+          <label>
+            4. Đăng nhập
+            <input type="file" id="fileDN" class="file-input" />
+            <div class="box">
+              <div class="filename">Chưa có tệp</div>
+              <button type="button" class="upload-btn">Tải file</button>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="joinfile">
+        <button class="joinfile-btn" id="joinfile-btn" onclick="joinFiles()">Ghép file</button>
+      </div>
+
+      <progress class="progressBar" id="progressBar" value="0" max="100"></progress>
+
+      <div class="result">
+        <p class="result-text">File kết quả:</p>
+        <button class="downloadresultbtn" id="downloadBtn">result.xlsx</button>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
