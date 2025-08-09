@@ -154,3 +154,13 @@ input[type="file"] {
   visibility: hidden;
   margin-top: 20px;
 }
+
+@media (max-width: 768px) {
+  .uploadlist {
+    display: flex;
+    flex-direction: column;
+  }
+  .result p {
+    display: none;
+  }
+}
