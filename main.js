@@ -110,16 +110,26 @@ async function joinFiles() {
 
   updateProgress(10);
 
+  // tìm index cột dựa vào từ khóa chứa trong tiêu đề
+  const headerRow = dataNap[1];
+  function findColumnIndex(keyword) {
+    return headerRow.findIndex((title) => title && title.toLowerCase().includes(keyword.toLowerCase()));
+  }
+  const indexLanNap = findColumnIndex("lần nạp");
+  const indexTongNap = findColumnIndex("tiền nạp");
+  const indexTongRut = findColumnIndex("tiền rút");
+  const indexNganHang = findColumnIndex("ngân hàng");
+
   // Lấy dữ liệu từ file Nạp đầu
   const colA = dataNap.slice(2).map((row) => [row[0] || ""]); // Lấy dữ liệu từ Từ A3 STT
   const colC = dataNap.slice(2).map((row) => [row[2] || ""]); // Từ C3 tên tk
   const colD = dataNap.slice(2).map((row) => [row[3] || ""]); // Từ D3 lấy họ tên
   const colG = dataNap.slice(2).map((row) => [row[6] || ""]); //NGT cột G
   const colI = dataNap.slice(2).map((row) => [row[8] || ""]); //đại lý cột I
-  const colN = dataNap.slice(2).map((row) => [row[13] || ""]); //số lần nạp cột N
-  const colO = dataNap.slice(2).map((row) => [row[14] || ""]); // tổng nạp cột O
-  const colQ = dataNap.slice(2).map((row) => [row[16] || ""]); // tổng rút cột Q
-  const colAI = dataNap.slice(2).map((row) => [row[35] || ""]); // lấy cột ngân hàng AJ
+  const colN = dataNap.slice(2).map((row) => [row[indexLanNap] || ""]); //số lần nạp
+  const colO = dataNap.slice(2).map((row) => [row[indexTongNap] || ""]); //tổng tiền nạp
+  const colQ = dataNap.slice(2).map((row) => [row[indexTongRut] || ""]); //tổng tiền rút
+  const colAI = dataNap.slice(2).map((row) => [row[indexNganHang] || ""]); //ngân hàng
 
   // Lấy dữ liệu từ file đăng nhập
   const colUsername = dataDN.slice(2).map((row) => [row[1] || ""]); //lấy tên đn từ cột A
@@ -311,7 +321,7 @@ async function joinFiles() {
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
   if (generatedWb) {
-    XLSX.writeFile(generatedWb, "file-ket-qua-tai-ve.xlsx");
+    XLSX.writeFile(generatedWb, "file-ket-qua.xlsx");
   } else {
     alert("Chưa có dữ liệu để tải!");
   }
