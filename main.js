@@ -48,27 +48,27 @@ document.querySelectorAll(".box").forEach((box) => {
 
 //---------function Ghép file--------//
 
-const progressBar = document.getElementById("progressBar");
-progressBar.style.display = "block"; // Hiện progress
-
-function showProgress() {
-  progressBar.style.visibility = "visible";
-}
-function hideProgress() {
-  progressBar.style.visibility = "hidden";
-  progressBar.value = 0;
-}
-
-function updateProgress(value) {
-  progressBar.value = value;
-}
-
-showProgress();
-updateProgress(0);
-
 let generatedWb = null;
 
 async function joinFiles() {
+  const progressBar = document.getElementById("progressBar");
+
+  function showProgress(value = 0) {
+    progressBar.style.visibility = "visible";
+    progressBar.value = value;
+  }
+
+  function hideProgress() {
+    progressBar.style.visibility = "hidden";
+    progressBar.value = 0;
+  }
+
+  function updateProgress(value) {
+    progressBar.value = value;
+  }
+
+  showProgress(0);
+
   const inputND = document.getElementById("fileND");
   const inputDN = document.getElementById("fileDN");
   const inputKM = document.getElementById("fileKM");
@@ -108,7 +108,7 @@ async function joinFiles() {
   const sheetBCTT = wbBCTT.Sheets[wbBCTT.SheetNames[0]];
   const dataBCTT = XLSX.utils.sheet_to_json(sheetBCTT, { header: 1 });
 
-  updateProgress(10);
+  updateProgress(15);
 
   // tìm index cột dựa vào từ khóa chứa trong tiêu đề
   const headerRow = dataNap[1];
@@ -119,6 +119,8 @@ async function joinFiles() {
   const indexTongNap = findColumnIndex("tiền nạp");
   const indexTongRut = findColumnIndex("tiền rút");
   const indexNganHang = findColumnIndex("ngân hàng");
+  const indexIP = findColumnIndex("ip đăng nhập cuối");
+  const indexLink = findColumnIndex("tên miền đăng nhập lần cuối");
 
   // Lấy dữ liệu từ file Nạp đầu
   const colA = dataNap.slice(2).map((row) => [row[0] || ""]); // Lấy dữ liệu từ Từ A3 STT
@@ -130,11 +132,11 @@ async function joinFiles() {
   const colO = dataNap.slice(2).map((row) => [row[indexTongNap] || ""]); //tổng tiền nạp
   const colQ = dataNap.slice(2).map((row) => [row[indexTongRut] || ""]); //tổng tiền rút
   const colAI = dataNap.slice(2).map((row) => [row[indexNganHang] || ""]); //ngân hàng
+  const colNapIP = dataNap.slice(2).map((row) => [row[indexIP] || ""]); // lấy cột IP
+  const colNapLink = dataNap.slice(2).map((row) => [row[indexLink] || ""]); // lấy cột link
 
   // Lấy dữ liệu từ file đăng nhập
   const colUsername = dataDN.slice(2).map((row) => [row[1] || ""]); //lấy tên đn từ cột A
-  const colIP = dataDN.slice(2).map((row) => [row[2] || ""]); //lấy IP từ cột C
-  const colLink = dataDN.slice(2).map((row) => [row[3] || ""]); //lấy Link từ cột D
   const colFP = dataDN.slice(2).map((row) => [row[5] || ""]); //lấy Link từ cột F
 
   // Lấy dữ liệu từ file Khuyến mãi
@@ -143,36 +145,51 @@ async function joinFiles() {
 
   // Lấy dữ liệu từ file BCTT
   const colBCTTUsername = dataBCTT.slice(2).map((row) => [row[4] || ""]); // lấy username từ cột E
-  const colBCTTplatfrom = dataBCTT.slice(2).map((row) => [row[3] || ""]); // lấy username từ cột D
-  const colBCTTchl = dataBCTT.slice(2).map((row) => [row[18] || ""]); // lấy tên CHL từ cột S
+  const colBCTTplatfrom = dataBCTT.slice(2).map((row) => [row[3] || ""]); // lấy tên sảnh từ cột D
+  const colBCTTchl = dataBCTT.slice(2).map((row) => [row[18] || ""]); // lấy tổng CHL từ cột S
 
-  updateProgress(15);
+  updateProgress(25);
 
-  // so sánh dữ liệu từ file đăng nhập vs file khuyến mãi để lấy tên tổng CHL
+  // so sánh dữ liệu từ file đăng nhập vs file BCTT để lấy  tổng CHL
+
   const totalCHLMap = new Map();
-  for (let i = 0; i < colBCTTUsername.length; i++) {
-    const username = colBCTTUsername[i][0];
-    const chlRaw = colBCTTchl[i][0];
-    const chl = Number(String(chlRaw).replace(/[^0-9.-]/g, "")) || 0;
-    if (username) {
-      const currentTotal = totalCHLMap.get(username) || 0;
-      totalCHLMap.set(username, currentTotal + chl);
-    }
-  }
-
-  // so sánh dữ liệu từ file đăng nhập vs file khuyến mãi để lấy tên tên sảnh
   const flatformMap = new Map();
+  const platformChlSeen = new Set(); // lưu bộ 3 username__platform__chl đã gặp
+
+  const filteredBCTT = [];
+
   for (let i = 0; i < colBCTTUsername.length; i++) {
     const username = colBCTTUsername[i][0];
-    let platform = colBCTTplatfrom[i][0];
+    let platform = colBCTTplatfrom[i][0] || "";
+    let chlRaw = colBCTTchl[i][0];
+
+    // Chuẩn hóa
+    platform = platform.replace(/[^A-Za-z0-9 ]/g, "").trim();
+    const chl = Number(String(chlRaw).replace(/[^0-9.-]/g, "")) || 0;
+
     if (username && platform) {
-      platform = platform.replace(/[^A-Za-z0-9 ]/g, "").trim();
-      if (platform) {
+      const keyCheck = `${username}__${platform}__${chl}`;
+
+      if (!platformChlSeen.has(keyCheck)) {
+        platformChlSeen.add(keyCheck);
+
+        // Cộng dồn CHL
+        const currentTotal = totalCHLMap.get(username) || 0;
+        totalCHLMap.set(username, currentTotal + chl);
+
+        // Lưu platform
         const allPlatform = flatformMap.get(username) || [];
         if (!allPlatform.includes(platform)) {
           allPlatform.push(platform);
         }
         flatformMap.set(username, allPlatform);
+
+        // Lưu vào mảng dữ liệu sạch
+        filteredBCTT.push({
+          username,
+          platform,
+          chl,
+        });
       }
     }
   }
@@ -192,25 +209,9 @@ async function joinFiles() {
     }
   }
 
-  updateProgress(20);
+  updateProgress(30);
 
   //so sánh dữ liệu từ file đăng nhập với file nạp đầu để lấy IP,link,thiết bị
-  const ipMap = new Map(); //IP
-  for (let i = 0; i < colUsername.length; i++) {
-    const username = colUsername[i][0];
-    const ip = colIP[i][0];
-    if (username && !ipMap.has(username)) {
-      ipMap.set(username, ip);
-    }
-  }
-  const linkMap = new Map(); //link
-  for (let i = 0; i < colUsername.length; i++) {
-    const username = colUsername[i][0];
-    const link = colLink[i][0];
-    if (username && !linkMap.has(username)) {
-      linkMap.set(username, link);
-    }
-  }
   const fpMap = new Map(); //fp
   for (let i = 0; i < colUsername.length; i++) {
     const username = colUsername[i][0];
@@ -229,7 +230,7 @@ async function joinFiles() {
     }
   });
 
-  updateProgress(30);
+  updateProgress(40);
 
   // Tạo giá trị ngày hôm qua
   const today = new Date();
@@ -280,8 +281,6 @@ async function joinFiles() {
   // Đưa dữ liệu vào file
   for (let i = 0; i < colA.length; i++) {
     const usernameNap = colC[i][0];
-    const ip = ipMap.get(usernameNap) || "";
-    const link = linkMap.get(usernameNap) || "";
     const fp = fpMap.get(usernameNap) || "";
     const promotionName = promotionMap.get(usernameNap) || "";
     const chl = totalCHLMap.get(usernameNap) || 0;
@@ -296,13 +295,13 @@ async function joinFiles() {
       colO[i][0],
       chl,
       colQ[i][0],
-      ip,
+      colNapIP[i][0],
       colAIslice[i],
       "" /*chi nhánh*/,
       promotionName,
       fp,
-      link,
-      platform /*sản phẩm*/,
+      colNapLink[i][0],
+      platform,
       "" /*cách cược*/,
       recharge[i],
     ];
@@ -317,6 +316,8 @@ async function joinFiles() {
 
   // Hiện nút tải xuống
   document.getElementById("downloadBtn").style.display = "inline-block";
+
+  hideProgress();
 }
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
@@ -326,6 +327,3 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
     alert("Chưa có dữ liệu để tải!");
   }
 });
-
-hideProgress();
-progressBar.value = 0;
