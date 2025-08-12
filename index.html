@@ -10,9 +10,11 @@
       href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
+    <link rel="shortcut icon" href="./img/v40_logo_simple.jpg" type="image/x-icon" />
     <title>Ghép File</title>
   </head>
   <body>
+    <figure><img class="logo" src="https://ok9sc.xyz/assert/ok9img/logo.png" alt="" /></figure>
     <div class="container">
       <h2>Ghép nối file</h2>
       <div class="uploadlist">
@@ -65,7 +67,7 @@
         <button class="joinfile-btn" id="joinfile-btn" onclick="joinFiles()">Ghép file</button>
       </div>
 
-      <progress class="progressBar" id="progressBar" value="0" max="100"></progress>
+      <span class="loader" id="loader"></span>
 
       <div class="result">
         <p class="result-text">File kết quả:</p>

@@ -38,7 +38,6 @@ document.querySelectorAll(".box").forEach((box) => {
     if (files.length > 0) {
       fileNameDiv.textContent = files[0].name;
 
-      // Trick để đặt file vào input[type=file]
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(files[0]);
       fileInput.files = dataTransfer.files;
@@ -51,24 +50,10 @@ document.querySelectorAll(".box").forEach((box) => {
 let generatedWb = null;
 
 async function joinFiles() {
-  const progressBar = document.getElementById("progressBar");
+  const loader = document.getElementById("loader");
+  loader.style.visibility = "visible";
 
-  function showProgress(value = 0) {
-    progressBar.style.visibility = "visible";
-    progressBar.value = value;
-  }
-
-  function hideProgress() {
-    progressBar.style.visibility = "hidden";
-    progressBar.value = 0;
-  }
-
-  function updateProgress(value) {
-    progressBar.value = value;
-  }
-
-  showProgress(0);
-
+  // lấy file
   const inputND = document.getElementById("fileND");
   const inputDN = document.getElementById("fileDN");
   const inputKM = document.getElementById("fileKM");
@@ -85,8 +70,6 @@ async function joinFiles() {
 
   const fileBCTT = inputBCTT.files[0];
   const arrayBufferBCTT = await fileBCTT.arrayBuffer();
-
-  updateProgress(5);
 
   // Đọc file Nạp đầu
   const wbNap = XLSX.read(arrayBufferND, { type: "array" });
@@ -108,26 +91,32 @@ async function joinFiles() {
   const sheetBCTT = wbBCTT.Sheets[wbBCTT.SheetNames[0]];
   const dataBCTT = XLSX.utils.sheet_to_json(sheetBCTT, { header: 1 });
 
-  updateProgress(15);
-
-  // tìm index cột dựa vào từ khóa chứa trong tiêu đề
+  // tìm index cột dựa vào từ khóa chứa trong tiêu đề file nạp đầu
   const headerRow = dataNap[1];
   function findColumnIndex(keyword) {
     return headerRow.findIndex((title) => title && title.toLowerCase().includes(keyword.toLowerCase()));
   }
-  const indexLanNap = findColumnIndex("lần nạp");
-  const indexTongNap = findColumnIndex("tiền nạp");
-  const indexTongRut = findColumnIndex("tiền rút");
-  const indexNganHang = findColumnIndex("ngân hàng");
-  const indexIP = findColumnIndex("ip đăng nhập cuối");
-  const indexLink = findColumnIndex("tên miền đăng nhập lần cuối");
+  function safeIndexNap(keyword, defaultIndex) {
+    const idx = findColumnIndex(keyword);
+    return idx >= 0 ? idx : defaultIndex;
+  }
 
+  const indexLanNap = safeIndexNap("lần nạp", 13);
+  const indexTongNap = safeIndexNap("tiền nạp", 14);
+  const indexTongRut = safeIndexNap("tiền rút", 16);
+  const indexNganHang = safeIndexNap("ngân hàng", 36);
+  const indexIP = safeIndexNap("ip đăng nhập cuối");
+  const indexLink = safeIndexNap("tên miền đăng nhập lần cuối", 25);
+  const indexNGT = safeIndexNap("người giới thiệu", 6);
+  const indexDL = safeIndexNap("đại lý", 8);
+  const indexName = safeIndexNap("họ tên", 3);
+  const indexUsername = safeIndexNap("tên tài khoản", 2);
   // Lấy dữ liệu từ file Nạp đầu
   const colA = dataNap.slice(2).map((row) => [row[0] || ""]); // Lấy dữ liệu từ Từ A3 STT
-  const colC = dataNap.slice(2).map((row) => [row[2] || ""]); // Từ C3 tên tk
-  const colD = dataNap.slice(2).map((row) => [row[3] || ""]); // Từ D3 lấy họ tên
-  const colG = dataNap.slice(2).map((row) => [row[6] || ""]); //NGT cột G
-  const colI = dataNap.slice(2).map((row) => [row[8] || ""]); //đại lý cột I
+  const colC = dataNap.slice(2).map((row) => [row[indexUsername] || ""]); // Từ C3 tên tk
+  const colD = dataNap.slice(2).map((row) => [row[indexName] || ""]); // Từ D3 lấy họ tên
+  const colG = dataNap.slice(2).map((row) => [row[indexNGT] || ""]); //NGT cột G
+  const colI = dataNap.slice(2).map((row) => [row[indexDL + 1] || ""]); //đại lý cột I
   const colN = dataNap.slice(2).map((row) => [row[indexLanNap] || ""]); //số lần nạp
   const colO = dataNap.slice(2).map((row) => [row[indexTongNap] || ""]); //tổng tiền nạp
   const colQ = dataNap.slice(2).map((row) => [row[indexTongRut] || ""]); //tổng tiền rút
@@ -143,18 +132,28 @@ async function joinFiles() {
   const colKMUsername = dataKM.slice(2).map((row) => [row[2] || ""]); // lấy username từ cột C
   const colKMname = dataKM.slice(2).map((row) => [row[12] || ""]); // lấy tên KM từ cột M
 
-  // Lấy dữ liệu từ file BCTT
-  const colBCTTUsername = dataBCTT.slice(2).map((row) => [row[4] || ""]); // lấy username từ cột E
-  const colBCTTplatfrom = dataBCTT.slice(2).map((row) => [row[3] || ""]); // lấy tên sảnh từ cột D
-  const colBCTTchl = dataBCTT.slice(2).map((row) => [row[18] || ""]); // lấy tổng CHL từ cột S
+  // tìm index cột dựa vào từ khóa chứa trong tiêu đề file BCTT
+  const headerBCTT = dataBCTT[1];
+  function findIndexBCTT(keyword) {
+    return headerBCTT.findIndex((title) => title && title.toLowerCase().includes(keyword.toLowerCase()));
+  }
+  function safeIndexBCTT(keyword, defaultIndex) {
+    const idx = findIndexBCTT(keyword);
+    return idx >= 0 ? idx : defaultIndex;
+  }
 
-  updateProgress(25);
+  const indexBCTTUsername = safeIndexBCTT("tên tài khoản", 4);
+  const indexPlatform = safeIndexBCTT("nền tảng", 3);
+  const indexCHL = safeIndexBCTT("cược hợp lệ", 18);
+  // Lấy dữ liệu từ file BCTT
+  const colBCTTUsername = dataBCTT.slice(2).map((row) => [row[indexBCTTUsername] || ""]); // lấy username từ cột E
+  const colBCTTplatfrom = dataBCTT.slice(2).map((row) => [row[indexPlatform] || ""]); // lấy tên sảnh từ cột D
+  const colBCTTchl = dataBCTT.slice(2).map((row) => [row[indexCHL] || ""]); // lấy tổng CHL từ cột S
 
   // so sánh dữ liệu từ file đăng nhập vs file BCTT để lấy  tổng CHL
-
   const totalCHLMap = new Map();
   const flatformMap = new Map();
-  const platformChlSeen = new Set(); // lưu bộ 3 username__platform__chl đã gặp
+  const platformChlSeen = new Set(); // lưu
 
   const filteredBCTT = [];
 
@@ -209,8 +208,6 @@ async function joinFiles() {
     }
   }
 
-  updateProgress(30);
-
   //so sánh dữ liệu từ file đăng nhập với file nạp đầu để lấy IP,link,thiết bị
   const fpMap = new Map(); //fp
   for (let i = 0; i < colUsername.length; i++) {
@@ -230,8 +227,6 @@ async function joinFiles() {
     }
   });
 
-  updateProgress(40);
-
   // Tạo giá trị ngày hôm qua
   const today = new Date();
   const yesterday = new Date(today);
@@ -249,8 +244,6 @@ async function joinFiles() {
     }
     return item[0];
   });
-
-  updateProgress(50);
 
   // Tạo workbook mới
   generatedWb = XLSX.utils.book_new();
@@ -307,17 +300,13 @@ async function joinFiles() {
     ];
   }
 
-  updateProgress(90);
-
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   XLSX.utils.book_append_sheet(generatedWb, ws, "Sheet1");
-
-  updateProgress(100);
 
   // Hiện nút tải xuống
   document.getElementById("downloadBtn").style.display = "inline-block";
 
-  hideProgress();
+  loader.style.visibility = "hidden";
 }
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
