@@ -176,26 +176,8 @@ input[type="file"] {
 .loader {
   margin-top: 10px;
   visibility: hidden;
-  --s: 10px;
-  --g: 5px;
-
-  height: calc(var(--s) + var(--g));
-  aspect-ratio: 3;
-  background: radial-gradient(
-      calc(var(--s) / sqrt(2)) at calc(50% - 0.1 * var(--s)) calc(50% - 0.2 * var(--s)),
-      #d1cbcb00 5%,
-      60%,
-      #a29e9e 98%
-    ),
-    linear-gradient(#2fdd04 0 0) no-repeat #ffffff;
-  background-size: calc(100% / 3) 100%;
-  mask: radial-gradient(calc(var(--s) / 2), #cecccc calc(100% - 1px), #93929200) 0 / calc(100% / 3) 100%;
-  animation: l11 steps(3) 2s infinite;
-}
-@keyframes l11 {
-  to {
-    background-position: 0, 150%;
-  }
+  font-size: 0.8rem;
+  color: rgb(199, 171, 88);
 }
 
 /* logo */
